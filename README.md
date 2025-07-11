@@ -71,3 +71,9 @@ This link gives an example script for a Unix VM. It didn't work straight out of 
 ```powershell
 az vm list-skus --resourceType vms --location uksouth --zone --all --output table
 ```   
+
+Having built the VM using Terraform it is possible to SSH into it from a GitBash window.
+Navigate to this folder in GitBash and run the following command, using the IP address output by Terraform.
+```gitbash
+ssh -i ./.ssh/id_rsa tuglow@172.167.19.187
+```
