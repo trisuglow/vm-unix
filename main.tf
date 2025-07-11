@@ -39,6 +39,18 @@ resource "azurerm_network_security_group" "my_terraform_nsg" {
   resource_group_name = azurerm_resource_group.rg.name
 
   security_rule {
+    name                       = "HTTP"
+    priority                   = 100
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "80"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
+
+  security_rule {
     name                       = "SSH"
     priority                   = 1001
     direction                  = "Inbound"
@@ -61,6 +73,7 @@ resource "azurerm_network_interface" "my_terraform_nic" {
     name                          = "my_nic_configuration"
     subnet_id                     = azurerm_subnet.my_terraform_subnet.id
     private_ip_address_allocation = "Dynamic"
+    # Might need to look at the ids here - change for Apache?
     public_ip_address_id          = azurerm_public_ip.my_terraform_public_ip.id
   }
 }
@@ -90,6 +103,7 @@ resource "azurerm_storage_account" "my_storage_account" {
   account_replication_type = "LRS"
 }
 
+
 # Create virtual machine
 resource "azurerm_linux_virtual_machine" "my_terraform_vm" {
   name                  = "TRISTAN_UGLOW"
@@ -111,7 +125,7 @@ resource "azurerm_linux_virtual_machine" "my_terraform_vm" {
     version   = "latest"
   }
 
-  computer_name  = "hostname"
+  computer_name  = "tristanuglow"
   admin_username = var.username
 
   admin_ssh_key {
@@ -123,3 +137,4 @@ resource "azurerm_linux_virtual_machine" "my_terraform_vm" {
     storage_account_uri = azurerm_storage_account.my_storage_account.primary_blob_endpoint
   }
 }
+
