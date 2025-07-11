@@ -28,11 +28,15 @@ output "key_data_private" {
 }
 
 resource "local_file" "private_key" {
-  content = azapi_resource_action.ssh_public_key_gen.output.privateKey
-  filename = "./.ssh/id_rsa"  
+  content              = azapi_resource_action.ssh_public_key_gen.output.privateKey
+  filename             = "./.ssh/id_rsa"
+  file_permission      = "0600"
+  directory_permission = "0600"
 }
 
 resource "local_file" "public_key" {
-  content = azapi_resource_action.ssh_public_key_gen.output.publicKey
-  filename = "./.ssh/id_rsa.pub"  
+  content              = azapi_resource_action.ssh_public_key_gen.output.publicKey
+  filename             = "./.ssh/id_rsa.pub"
+  file_permission      = "0600"
+  directory_permission = "0600"
 }

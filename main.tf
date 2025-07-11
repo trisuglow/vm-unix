@@ -74,7 +74,7 @@ resource "azurerm_network_interface" "my_terraform_nic" {
     subnet_id                     = azurerm_subnet.my_terraform_subnet.id
     private_ip_address_allocation = "Dynamic"
     # Might need to look at the ids here - change for Apache?
-    public_ip_address_id          = azurerm_public_ip.my_terraform_public_ip.id
+    public_ip_address_id = azurerm_public_ip.my_terraform_public_ip.id
   }
 }
 
