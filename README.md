@@ -77,3 +77,15 @@ Navigate to this folder in GitBash and run the following command, using the IP a
 ```gitbash
 ssh -i ./.ssh/id_rsa tuglow@172.167.19.187
 ```
+
+After connecting to the machine using ssh, run this command to install apache. You'll then be able to use a browser to navigate to http://172.167.19.187/ and see the Apace2 default page.
+```
+sudo apt install apache2 -y
+```
+Might also need to run these commands, but I didn't have to first time round.
+```
+	sudo systemctl start apache2
+	sudo systemctl enable apache2
+```
+
+The apache html file is found in /var/www/html.
