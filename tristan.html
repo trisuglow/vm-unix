@@ -1,1 +1,54 @@
-<html><body><h1>Tristan's Public WebPage</h1><p>Hello World!</p><p>I made this.</p></body></html>
+<html>
+<style>
+    #ship {
+        width: 20%;
+        position: fixed;
+    }
+
+    body {
+        background-image: url('https://images.saatchiart.com/saatchi/326909/art/2453272/1523288-HSC00001-7.jpg');
+        background-repeat: no-repeat;
+        background-size: cover;
+
+    }
+</style>
+
+<body>
+    <h1>Norway Cruise Fifty Day Countdown</h1>
+    <h1 id="howManyDays"></h1>
+    <div><img id="ship" src="https://www.cruisedeckplans.com/DP/cabinpics/244/reg/IonaExt-24780-1624557476.jpg"></div>
+</body>
+
+
+<script>
+    var movement = 0;
+    var step = 0.1;
+    function startTime() {
+
+        const today = new Date();
+        // const today = new Date('2025-08-30'); // Test Date.
+        const departure = new Date('2025-08-30');
+        const diffDays = Math.floor(Math.abs(today - departure) / (1000 * 60 * 60 * 24));
+
+        if (movement > 3) {
+            step = -0.1
+        } else if (movement < -3) {
+            step = 0.1;
+        }
+
+        movement = movement + step;
+
+        var howManyDays = document.getElementById('howManyDays');
+        howManyDays.innerHTML = diffDays + ' days to go.';
+        var shipsProgress = (8.0 / 5.0) * (50 - diffDays);
+        console.log(shipsProgress);
+        var ship = document.getElementById('ship');
+        var shipStyle = 'left:' + shipsProgress + '%;' + 'top:' + (50 + movement / 2) + '%;' + 'transform: rotate(' + movement % 360 + 'deg)';
+        ship.setAttribute('style', shipStyle);
+
+        setTimeout(startTime, 100);
+    }
+    startTime();
+</script>
+
+</html>
