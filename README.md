@@ -87,5 +87,14 @@ Might also need to run these commands, but I didn't have to first time round.
 	sudo systemctl start apache2
 	sudo systemctl enable apache2
 ```
-
 The apache html file is found in /var/www/html.
+
+Fun unix commands to try when you're connected via ssh
+ - whoami
+ - who
+ - w
+ - pwd
+ - uptime
+ - hostname
+ - uname -a
+
