@@ -152,7 +152,7 @@ resource "azurerm_linux_virtual_machine" "my_terraform_vm" {
   }
 
   provisioner "local-exec" {
-    command = "winget install -e --id Python.Python.3.11"
+    command = "winget install -e --id Python.Python.3.11 --no-upgrade --force"
   }
 
   provisioner "local-exec" {
@@ -160,7 +160,15 @@ resource "azurerm_linux_virtual_machine" "my_terraform_vm" {
   }
 
   provisioner "local-exec" {
-    command = "pip install --include-deps ansible-core"
+    command = "python -m pip install --user pipx"
+  }
+
+  # provisioner "local-exec" {
+  #   command = "python -m pipx ensurepath"
+  # }
+
+  provisioner "local-exec" {
+    command = "C:/Users/tuglow/AppData/Roaming/Python/Python313/Scripts/pipx install --include-deps ansible-core"
   }
 
   provisioner "local-exec" {
