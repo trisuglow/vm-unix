@@ -151,18 +151,21 @@ resource "azurerm_linux_virtual_machine" "my_terraform_vm" {
     }
   }
 
+  provisioner "local-exec" {
+    command = "winget install -e --id Python.Python.3.11"
+  }
 
-  # provisioner "local-exec" {
-  #   command = "echo Attempting to do stuff with an ansible playbook"
-  # }
+  provisioner "local-exec" {
+    command = "python -V"
+  }
 
-  # provisioner "local-exec" {
-  #   command = "echo Using IP Address ${azurerm_linux_virtual_machine.my_terraform_vm.public_ip_address}"
-  # }
+  provisioner "local-exec" {
+    command = "pip install --include-deps ansible-core"
+  }
 
-  # provisioner "local-exec" {
-  #   command = "ansible-playbook -u " + var.username + " -i '${azurerm_linux_virtual_machine.my_terraform_vm.public_ip_address},' --private-key ${azapi_resource_action.ssh_public_key_gen.output.privateKey} ansible/apache.yml"
-  # }
+  provisioner "local-exec" {
+    command = "ansible --version"
+  }
 
   provisioner "local-exec" {
     command = "ansible-playbook -u ${var.username}  -i '${azurerm_linux_virtual_machine.my_terraform_vm.public_ip_address}' --private-key ${azapi_resource_action.ssh_public_key_gen.output.privateKey} ansible/apache.yml"
