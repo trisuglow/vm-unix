@@ -136,5 +136,35 @@ resource "azurerm_linux_virtual_machine" "my_terraform_vm" {
   boot_diagnostics {
     storage_account_uri = azurerm_storage_account.my_storage_account.primary_blob_endpoint
   }
-}
 
+  provisioner "remote-exec" {
+    inline = [
+      "echo 'Well done Sir. You have created a file.' >> readme",
+      "chmod 444 readme"
+      ]
+
+    connection {
+      host        = azurerm_linux_virtual_machine.my_terraform_vm.public_ip_address
+      type        = "ssh"
+      user        = var.username
+      private_key = azapi_resource_action.ssh_public_key_gen.output.privateKey
+    }
+  }
+
+
+  # provisioner "local-exec" {
+  #   command = "echo Attempting to do stuff with an ansible playbook"
+  # }
+
+  # provisioner "local-exec" {
+  #   command = "echo Using IP Address ${azurerm_linux_virtual_machine.my_terraform_vm.public_ip_address}"
+  # }
+
+  # provisioner "local-exec" {
+  #   command = "ansible-playbook -u " + var.username + " -i '${azurerm_linux_virtual_machine.my_terraform_vm.public_ip_address},' --private-key ${azapi_resource_action.ssh_public_key_gen.output.privateKey} ansible/apache.yml"
+  # }
+
+  provisioner "local-exec" {
+    command = "ansible-playbook -u ${var.username}  -i '${azurerm_linux_virtual_machine.my_terraform_vm.public_ip_address}' --private-key ${azapi_resource_action.ssh_public_key_gen.output.privateKey} ansible/apache.yml"
+  }
+}

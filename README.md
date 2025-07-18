@@ -89,7 +89,8 @@ Might also need to run these commands, but I didn't have to first time round.
 ```
 The apache html file is found in /var/www/html.
 
-Fun unix commands to try when you're connected via ssh
+Fun unix commands to try when you're connected via ssh.
+ - ls -l    The terraform script will have created a readme file, and set the permissions to read-only.
  - whoami
  - who
  - w
@@ -97,4 +98,3 @@ Fun unix commands to try when you're connected via ssh
  - uptime
  - hostname
  - uname -a
-
