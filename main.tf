@@ -178,12 +178,13 @@ resource "azurerm_linux_virtual_machine" "ansible_control_node" {
     inline = [
       "echo 'Well done Sir. You have created a file. This is the Ansible control node.' >> readme",
       "chmod 444 readme",
+      "chmod 777 apache.yml",
       "sudo apt update",
       "sudo apt install software-properties-common",
       "sudo add-apt-repository --yes --update ppa:ansible/ansible",
       "sudo apt install ansible --yes",
       "ansible --version",
-      "ansible-playbook -u ${var.username} -i '${azurerm_linux_virtual_machine.web_server.public_ip_address}' --private-key ${azapi_resource_action.ssh_public_key_gen.output.privateKey} /home/${var.username}/apache.yml"
+      "ansible-playbook -u ${var.username} -i ${azurerm_linux_virtual_machine.web_server.public_ip_address}, --private-key ${azapi_resource_action.ssh_public_key_gen.output.privateKey} /home/${var.username}/apache.yml"
     ]
 
     connection {
