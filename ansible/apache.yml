@@ -1,6 +1,6 @@
 ---
 - name: Install Apache on Ubuntu
-  hosts: your_target_server
+  hosts: all
   become: yes
   
   tasks:
