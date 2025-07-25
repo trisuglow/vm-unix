@@ -168,7 +168,7 @@ resource "azurerm_linux_virtual_machine" "my_terraform_vm" {
   # }
 
   provisioner "local-exec" {
-    command = "C:/Users/tuglow/AppData/Roaming/Python/Python313/Scripts/pipx install --include-deps ansible-core"
+    command = "C:/Users/tuglow/AppData/Roaming/Python/Python313/Scripts/pipx install --include-deps ansible"
   }
 
   provisioner "local-exec" {
