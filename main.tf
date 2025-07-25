@@ -24,8 +24,16 @@ resource "azurerm_subnet" "my_terraform_subnet" {
 }
 
 # Create public IPs
-resource "azurerm_public_ip" "my_terraform_public_ip" {
-  name                = "myPublicIP"
+resource "azurerm_public_ip" "ansible_control_node_public_ip" {
+  name                = "ansible_control_node_public_ip"
+  sku                 = "Standard"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+  allocation_method   = "Static"
+}
+
+resource "azurerm_public_ip" "web_server_public_ip" {
+  name                = "web_server_public_ip"
   sku                 = "Standard"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
@@ -63,24 +71,41 @@ resource "azurerm_network_security_group" "my_terraform_nsg" {
   }
 }
 
-# Create network interface
-resource "azurerm_network_interface" "my_terraform_nic" {
-  name                = "myNIC"
+# Create network interfaces
+resource "azurerm_network_interface" "ansible_control_node_nic" {
+  name                = "ansible_control_node_nic"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
 
   ip_configuration {
-    name                          = "my_nic_configuration"
+    name                          = "ansible_control_node_nic_configuration"
     subnet_id                     = azurerm_subnet.my_terraform_subnet.id
     private_ip_address_allocation = "Dynamic"
-    # Might need to look at the ids here - change for Apache?
-    public_ip_address_id = azurerm_public_ip.my_terraform_public_ip.id
+    public_ip_address_id = azurerm_public_ip.ansible_control_node_public_ip.id
   }
 }
 
-# Connect the security group to the network interface
-resource "azurerm_network_interface_security_group_association" "example" {
-  network_interface_id      = azurerm_network_interface.my_terraform_nic.id
+resource "azurerm_network_interface" "web_server_nic" {
+  name                = "web_server_nic"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+
+  ip_configuration {
+    name                          = "web_server_nic_configuration"
+    subnet_id                     = azurerm_subnet.my_terraform_subnet.id
+    private_ip_address_allocation = "Dynamic"
+    public_ip_address_id = azurerm_public_ip.web_server_public_ip.id
+  }
+}
+
+# Connect the security group to the network interfaces
+resource "azurerm_network_interface_security_group_association" "ansible_control_node_nsg_association" {
+  network_interface_id      = azurerm_network_interface.ansible_control_node_nic.id
+  network_security_group_id = azurerm_network_security_group.my_terraform_nsg.id
+}
+
+resource "azurerm_network_interface_security_group_association" "web_server_nsg_association" {
+  network_interface_id      = azurerm_network_interface.web_server_nic.id
   network_security_group_id = azurerm_network_security_group.my_terraform_nsg.id
 }
 
@@ -103,17 +128,16 @@ resource "azurerm_storage_account" "my_storage_account" {
   account_replication_type = "LRS"
 }
 
-
-# Create virtual machine
-resource "azurerm_linux_virtual_machine" "my_terraform_vm" {
-  name                  = "TRISTAN_UGLOW"
+# Create virtual machine from which to run Ansible
+resource "azurerm_linux_virtual_machine" "ansible_control_node" {
+  name                  = "TRIS_ANSIBLE_CONTROL_NODE"
   location              = azurerm_resource_group.rg.location
   resource_group_name   = azurerm_resource_group.rg.name
-  network_interface_ids = [azurerm_network_interface.my_terraform_nic.id]
-  size                  = "Standard_B16als_v2"
+  network_interface_ids = [azurerm_network_interface.ansible_control_node_nic.id]
+  size                  = "Standard_B2as_v2"
 
   os_disk {
-    name                 = "TristanOperatingSystemDisk"
+    name                 = "ACN_Disk"
     caching              = "ReadWrite"
     storage_account_type = "Standard_LRS"
   }
@@ -125,7 +149,7 @@ resource "azurerm_linux_virtual_machine" "my_terraform_vm" {
     version   = "latest"
   }
 
-  computer_name  = "tristanuglow"
+  computer_name  = "tris-ansible-control-node"
   admin_username = var.username
 
   admin_ssh_key {
@@ -139,43 +163,69 @@ resource "azurerm_linux_virtual_machine" "my_terraform_vm" {
 
   provisioner "remote-exec" {
     inline = [
-      "echo 'Well done Sir. You have created a file.' >> readme",
-      "chmod 444 readme"
-      ]
+      "echo 'Well done Sir. You have created a file. This is the Ansible control node.' >> readme",
+      "chmod 444 readme",
+      "winget install -e --id Python.Python.3.11 --no-upgrade --force",
+      "python -V",
+      "python -m pip install --user pipx",
+      "pipx install --include-deps ansible",
+      "ansible --version",
+      "ansible-playbook -u ${var.username}  -i '${azurerm_linux_virtual_machine.web_server.public_ip_address}' --private-key ${azapi_resource_action.ssh_public_key_gen.output.privateKey} ansible/apache.yml"
+    ]
 
     connection {
-      host        = azurerm_linux_virtual_machine.my_terraform_vm.public_ip_address
+      host        = azurerm_linux_virtual_machine.ansible_control_node.public_ip_address
       type        = "ssh"
       user        = var.username
       private_key = azapi_resource_action.ssh_public_key_gen.output.privateKey
     }
   }
+}
 
-  provisioner "local-exec" {
-    command = "winget install -e --id Python.Python.3.11 --no-upgrade --force"
+# Create virtual machine to host web page
+resource "azurerm_linux_virtual_machine" "web_server" {
+  name                  = "TRIS_WEB_SERVER"
+  location              = azurerm_resource_group.rg.location
+  resource_group_name   = azurerm_resource_group.rg.name
+  network_interface_ids = [azurerm_network_interface.web_server_nic.id]
+  size                  = "Standard_B2as_v2"
+
+  os_disk {
+    name                 = "WS_DISK"
+    caching              = "ReadWrite"
+    storage_account_type = "Standard_LRS"
   }
 
-  provisioner "local-exec" {
-    command = "python -V"
+  source_image_reference {
+    publisher = "Canonical"
+    offer     = "0001-com-ubuntu-server-jammy"
+    sku       = "22_04-lts-gen2"
+    version   = "latest"
   }
 
-  provisioner "local-exec" {
-    command = "python -m pip install --user pipx"
+  computer_name  = "tris-web-server"
+  admin_username = var.username
+
+  admin_ssh_key {
+    username   = var.username
+    public_key = azapi_resource_action.ssh_public_key_gen.output.publicKey
   }
 
-  # provisioner "local-exec" {
-  #   command = "python -m pipx ensurepath"
-  # }
-
-  provisioner "local-exec" {
-    command = "C:/Users/tuglow/AppData/Roaming/Python/Python313/Scripts/pipx install --include-deps ansible"
+  boot_diagnostics {
+    storage_account_uri = azurerm_storage_account.my_storage_account.primary_blob_endpoint
   }
 
-  provisioner "local-exec" {
-    command = "ansible --version"
-  }
+  provisioner "remote-exec" {
+    inline = [
+      "echo 'Well done Sir. You have created a file. This is the web host machine.' >> readme",
+      "chmod 444 readme"
+    ]
 
-  provisioner "local-exec" {
-    command = "ansible-playbook -u ${var.username}  -i '${azurerm_linux_virtual_machine.my_terraform_vm.public_ip_address}' --private-key ${azapi_resource_action.ssh_public_key_gen.output.privateKey} ansible/apache.yml"
+    connection {
+      host        = azurerm_linux_virtual_machine.web_server.public_ip_address
+      type        = "ssh"
+      user        = var.username
+      private_key = azapi_resource_action.ssh_public_key_gen.output.privateKey
+    }
   }
 }
