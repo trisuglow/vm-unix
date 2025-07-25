@@ -98,3 +98,34 @@ Fun unix commands to try when you're connected via ssh.
  - uptime
  - hostname
  - uname -a
+
+
+Ansible debugging guide
+https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html
+
+
+Looks like Ansible has to be run from WSL, if using a Windows machine rather than Unix.
+Open up WSL, go to \mnt\d\trisuglow\vm-unix\ansible.
+
+Run this:  ansible-playbook -i 20.68.221.231, -u tuglow apache.yml
+
+
+
+Open Ubuntu on the laptop.
+
+################ Maybe this is the wrong route - try using pipx instead #################
+You'll need Ansible. Get it by running this. The tuglow password is password.
+sudo apt install ansible
+#########################################################################################
+
+To make sure you've got the latest Ansible you'll need pip
+sudo apt install pipx
+
+Install Ansible using this
+pipx install --include-deps ansible
+
+Upgrade Ansible using this
+pipx upgrade --include-injected ansible
+
+Make sure the path is set.
+pipx ensurepath
