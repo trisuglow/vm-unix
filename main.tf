@@ -81,7 +81,7 @@ resource "azurerm_network_interface" "ansible_control_node_nic" {
     name                          = "ansible_control_node_nic_configuration"
     subnet_id                     = azurerm_subnet.my_terraform_subnet.id
     private_ip_address_allocation = "Dynamic"
-    public_ip_address_id = azurerm_public_ip.ansible_control_node_public_ip.id
+    public_ip_address_id          = azurerm_public_ip.ansible_control_node_public_ip.id
   }
 }
 
@@ -94,7 +94,7 @@ resource "azurerm_network_interface" "web_server_nic" {
     name                          = "web_server_nic_configuration"
     subnet_id                     = azurerm_subnet.my_terraform_subnet.id
     private_ip_address_allocation = "Dynamic"
-    public_ip_address_id = azurerm_public_ip.web_server_public_ip.id
+    public_ip_address_id          = azurerm_public_ip.web_server_public_ip.id
   }
 }
 
@@ -161,16 +161,29 @@ resource "azurerm_linux_virtual_machine" "ansible_control_node" {
     storage_account_uri = azurerm_storage_account.my_storage_account.primary_blob_endpoint
   }
 
+  # Copy playbook to control node.
+  provisioner "file" {
+    source      = "ansible/apache.yml"
+    destination = "apache.yml"
+
+    connection {
+      host        = azurerm_linux_virtual_machine.ansible_control_node.public_ip_address
+      type        = "ssh"
+      user        = var.username
+      private_key = azapi_resource_action.ssh_public_key_gen.output.privateKey
+    }
+  }
+
   provisioner "remote-exec" {
     inline = [
       "echo 'Well done Sir. You have created a file. This is the Ansible control node.' >> readme",
       "chmod 444 readme",
-      "winget install -e --id Python.Python.3.11 --no-upgrade --force",
-      "python -V",
-      "python -m pip install --user pipx",
-      "pipx install --include-deps ansible",
+      "sudo apt update",
+      "sudo apt install software-properties-common",
+      "sudo add-apt-repository --yes --update ppa:ansible/ansible",
+      "sudo apt install ansible --yes",
       "ansible --version",
-      "ansible-playbook -u ${var.username}  -i '${azurerm_linux_virtual_machine.web_server.public_ip_address}' --private-key ${azapi_resource_action.ssh_public_key_gen.output.privateKey} ansible/apache.yml"
+      "ansible-playbook -u ${var.username} -i '${azurerm_linux_virtual_machine.web_server.public_ip_address}' --private-key ${azapi_resource_action.ssh_public_key_gen.output.privateKey} /home/${var.username}/apache.yml"
     ]
 
     connection {
