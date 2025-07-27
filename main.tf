@@ -161,10 +161,22 @@ resource "azurerm_linux_virtual_machine" "ansible_control_node" {
     storage_account_uri = azurerm_storage_account.my_storage_account.primary_blob_endpoint
   }
 
-  # Copy playbook to control node.
+  # Create folder on control node to hold Ansible playbooks.
+  provisioner "remote-exec" {
+    inline = [ "md ansible" ]
+
+    connection {
+      host        = azurerm_linux_virtual_machine.ansible_control_node.public_ip_address
+      type        = "ssh"
+      user        = var.username
+      private_key = azapi_resource_action.ssh_public_key_gen.output.privateKey
+    }
+  }
+  
+  # Copy playbooks to control node.
   provisioner "file" {
-    source      = "ansible/apache.yml"
-    destination = "apache.yml"
+    source      = "ansible/"
+    destination = "ansible"
 
     connection {
       host        = azurerm_linux_virtual_machine.ansible_control_node.public_ip_address
@@ -178,13 +190,17 @@ resource "azurerm_linux_virtual_machine" "ansible_control_node" {
     inline = [
       "echo 'Well done Sir. You have created a file. This is the Ansible control node.' >> readme",
       "chmod 444 readme",
-      "chmod 777 apache.yml",
+      "chmod 777 ansible/apache.yml",      
+      "chmod 777 ansible/webserver.yml",
+      "md .ssh",
+      "echo '${azapi_resource_action.ssh_public_key_gen.output.privateKey}' >> .ssh/id_rsa",
       "sudo apt update",
       "sudo apt install software-properties-common",
       "sudo add-apt-repository --yes --update ppa:ansible/ansible",
       "sudo apt install ansible --yes",
       "ansible --version",
-      "ansible-playbook -u ${var.username} -i ${azurerm_linux_virtual_machine.web_server.public_ip_address}, --private-key ${azapi_resource_action.ssh_public_key_gen.output.privateKey} /home/${var.username}/apache.yml"
+      "ansible-playbook -u ${var.username} -i ${azurerm_linux_virtual_machine.web_server.public_ip_address}, --private-key ./.ssh/id_rsa /home/${var.username}/ansible/apache.yml",
+      "ansible-playbook -u ${var.username} -i ${azurerm_linux_virtual_machine.web_server.public_ip_address}, --private-key ./.ssh/id_rsa /home/${var.username}/ansible/website.yml"
     ]
 
     connection {
@@ -227,6 +243,13 @@ resource "azurerm_linux_virtual_machine" "web_server" {
 
   boot_diagnostics {
     storage_account_uri = azurerm_storage_account.my_storage_account.primary_blob_endpoint
+  }
+
+  provisioner "local-exec" {
+    command = <<-EOT
+"New-Item 'launch.ps1' -ItemType File -Force -Value 'Start-Process http://${azurerm_linux_virtual_machine.web_server.public_ip_address}/tristan.html'"
+     EOT
+    interpreter = ["PowerShell", "-Command"]
   }
 
   provisioner "remote-exec" {
