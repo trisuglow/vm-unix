@@ -163,7 +163,7 @@ resource "azurerm_linux_virtual_machine" "ansible_control_node" {
 
   # Create folder on control node to hold Ansible playbooks.
   provisioner "remote-exec" {
-    inline = [ "md ansible" ]
+    inline = [ "mkdir ansible" ]
 
     connection {
       host        = azurerm_linux_virtual_machine.ansible_control_node.public_ip_address
