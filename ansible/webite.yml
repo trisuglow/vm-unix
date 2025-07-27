@@ -1,0 +1,5 @@
+tasks: 
+- name: Copy website files to webserver
+  copy:
+    src:  ../html/
+    dest: /var/www/html/
