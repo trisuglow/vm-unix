@@ -201,8 +201,8 @@ resource "azurerm_linux_virtual_machine" "ansible_control_node" {
       "ansible --version",
       "sudo chmod 777 /etc/ansible/ansible.cfg",
       "cp ansible/ansible.cfg /etc/ansible/ansible.cfg",
-      "ansible-playbook -u ${var.username} -i ${azurerm_linux_virtual_machine.web_server.public_ip_address}, --private-key ./.ssh/web_id_rsa /home/${var.username}/ansible/apache.yml",
-      "ansible-playbook -u ${var.username} -i ${azurerm_linux_virtual_machine.web_server.public_ip_address}, --private-key ./.ssh/web_id_rsa /home/${var.username}/ansible/website.yml"
+      "ansible-playbook -v -u ${var.username} -i ${azurerm_linux_virtual_machine.web_server.public_ip_address}, --private-key ./.ssh/web_id_rsa /home/${var.username}/ansible/apache.yml",
+      "ansible-playbook -v -u ${var.username} -i ${azurerm_linux_virtual_machine.web_server.public_ip_address}, --private-key ./.ssh/web_id_rsa /home/${var.username}/ansible/website.yml"
     ]
 
     connection {
