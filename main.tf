@@ -192,15 +192,16 @@ resource "azurerm_linux_virtual_machine" "ansible_control_node" {
       "chmod 444 readme",
       "chmod 777 ansible/apache.yml",      
       "chmod 777 ansible/website.yml",
-      "md .ssh",
-      "echo '${azapi_resource_action.ssh_public_key_gen.output.privateKey}' >> .ssh/id_rsa",
+      "echo '${azapi_resource_action.ssh_public_key_gen.output.privateKey}' >> .ssh/web_id_rsa",
       "sudo apt update",
       "sudo apt install software-properties-common",
       "sudo add-apt-repository --yes --update ppa:ansible/ansible",
       "sudo apt install ansible --yes",
       "ansible --version",
-      "ansible-playbook -u ${var.username} -i ${azurerm_linux_virtual_machine.web_server.public_ip_address}, --private-key ./.ssh/id_rsa /home/${var.username}/ansible/apache.yml",
-      "ansible-playbook -u ${var.username} -i ${azurerm_linux_virtual_machine.web_server.public_ip_address}, --private-key ./.ssh/id_rsa /home/${var.username}/ansible/website.yml"
+      "sudo chmod 777 /etc/ansible/ansible.cfg",
+      "cp ansible.cfg /etc/ansible/ansible.cfg",
+      "ansible-playbook -u ${var.username} -i ${azurerm_linux_virtual_machine.web_server.public_ip_address}, --private-key ./.ssh/web_id_rsa /home/${var.username}/ansible/apache.yml",
+      "ansible-playbook -u ${var.username} -i ${azurerm_linux_virtual_machine.web_server.public_ip_address}, --private-key ./.ssh/web_id_rsa /home/${var.username}/ansible/website.yml"
     ]
 
     connection {
