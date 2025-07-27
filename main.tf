@@ -191,7 +191,7 @@ resource "azurerm_linux_virtual_machine" "ansible_control_node" {
       "echo 'Well done Sir. You have created a file. This is the Ansible control node.' >> readme",
       "chmod 444 readme",
       "chmod 777 ansible/apache.yml",      
-      "chmod 777 ansible/webserver.yml",
+      "chmod 777 ansible/website.yml",
       "md .ssh",
       "echo '${azapi_resource_action.ssh_public_key_gen.output.privateKey}' >> .ssh/id_rsa",
       "sudo apt update",
