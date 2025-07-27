@@ -44,3 +44,6 @@ testing/
 
 # Ignore keys
 .ssh/
+
+#Ignore utility file
+launch.ps1
