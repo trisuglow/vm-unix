@@ -185,6 +185,19 @@ resource "azurerm_linux_virtual_machine" "ansible_control_node" {
       private_key = azapi_resource_action.ssh_public_key_gen.output.privateKey
     }
   }
+  
+  # Copy web files to control node.
+  provisioner "file" {
+    source      = "html/tristan.html"
+    destination = "tristan.html"
+
+    connection {
+      host        = azurerm_linux_virtual_machine.ansible_control_node.public_ip_address
+      type        = "ssh"
+      user        = var.username
+      private_key = azapi_resource_action.ssh_public_key_gen.output.privateKey
+    }
+  }
 
   provisioner "remote-exec" {
     inline = [
