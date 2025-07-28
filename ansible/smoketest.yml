@@ -1,0 +1,15 @@
+---
+- name: Smoke test playbook
+  hosts: all
+  
+  tasks: 
+  - name: Create a test file
+    file:
+      path: "test_file.txt"
+      state: touch
+    become: yes
+
+  - name: Write to test file
+    lineinfile:
+      path: "test_file.txt"
+      line: "Hello, this is a smoke test."
