@@ -163,7 +163,7 @@ resource "azurerm_linux_virtual_machine" "ansible_control_node" {
 
   # Create folder on control node to hold Ansible playbooks.
   provisioner "remote-exec" {
-    inline = [ "mkdir ansible" ]
+    inline = ["mkdir ansible"]
 
     connection {
       host        = azurerm_linux_virtual_machine.ansible_control_node.public_ip_address
@@ -172,7 +172,7 @@ resource "azurerm_linux_virtual_machine" "ansible_control_node" {
       private_key = azapi_resource_action.ssh_public_key_gen.output.privateKey
     }
   }
-  
+
   # Copy playbooks to control node.
   provisioner "file" {
     source      = "ansible/"
@@ -185,7 +185,7 @@ resource "azurerm_linux_virtual_machine" "ansible_control_node" {
       private_key = azapi_resource_action.ssh_public_key_gen.output.privateKey
     }
   }
-  
+
   # Copy web files to control node.
   provisioner "file" {
     source      = "html/tristan.html"
@@ -203,7 +203,7 @@ resource "azurerm_linux_virtual_machine" "ansible_control_node" {
     inline = [
       "echo 'Well done Sir. You have created a file. This is the Ansible control node.' >> readme",
       "chmod 444 readme",
-      "chmod 777 ansible/apache.yml",      
+      "chmod 777 ansible/apache.yml",
       "chmod 777 ansible/website.yml",
       "echo '${azapi_resource_action.ssh_public_key_gen.output.privateKey}' >> .ssh/web_id_rsa",
       "sudo chmod 600 .ssh/web_id_rsa",
@@ -214,9 +214,9 @@ resource "azurerm_linux_virtual_machine" "ansible_control_node" {
       "ansible --version",
       "sudo chmod 777 /etc/ansible/ansible.cfg",
       "cp ansible/ansible.cfg /etc/ansible/ansible.cfg",
-      "ansible-playbook -v -u ${var.username} -i ${azurerm_linux_virtual_machine.web_server.public_ip_address}, --private-key ./.ssh/web_id_rsa /home/${var.username}/ansible/smoketest.yml",
-      # "ansible-playbook -v -u ${var.username} -i ${azurerm_linux_virtual_machine.web_server.public_ip_address}, --private-key ./.ssh/web_id_rsa /home/${var.username}/ansible/apache.yml",
-      # "ansible-playbook -v -u ${var.username} -i ${azurerm_linux_virtual_machine.web_server.public_ip_address}, --private-key ./.ssh/web_id_rsa /home/${var.username}/ansible/website.yml"
+      "sudo ansible-playbook -v -u ${var.username} -i ${azurerm_linux_virtual_machine.web_server.public_ip_address}, --private-key ./.ssh/web_id_rsa /home/${var.username}/ansible/smoketest.yml",
+      "sudo ansible-playbook -v -u ${var.username} -i ${azurerm_linux_virtual_machine.web_server.public_ip_address}, --private-key ./.ssh/web_id_rsa /home/${var.username}/ansible/apache.yml",
+      "sudo ansible-playbook -v -u ${var.username} -i ${azurerm_linux_virtual_machine.web_server.public_ip_address}, --private-key ./.ssh/web_id_rsa /home/${var.username}/ansible/website.yml"
     ]
 
     connection {
@@ -262,7 +262,7 @@ resource "azurerm_linux_virtual_machine" "web_server" {
   }
 
   provisioner "local-exec" {
-    command = <<-EOT
+    command     = <<-EOT
 "New-Item 'launch.ps1' -ItemType File -Force -Value 'Start-Process http://${azurerm_linux_virtual_machine.web_server.public_ip_address}/tristan.html'"
      EOT
     interpreter = ["PowerShell", "-Command"]
