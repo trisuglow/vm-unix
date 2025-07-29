@@ -163,7 +163,10 @@ resource "azurerm_linux_virtual_machine" "ansible_control_node" {
 
   # Create folder on control node to hold Ansible playbooks.
   provisioner "remote-exec" {
-    inline = ["mkdir ansible"]
+    inline = [
+      "mkdir ansible",
+      "mkdir html"
+      ]
 
     connection {
       host        = azurerm_linux_virtual_machine.ansible_control_node.public_ip_address
@@ -186,10 +189,10 @@ resource "azurerm_linux_virtual_machine" "ansible_control_node" {
     }
   }
 
-  # Copy web files to control node.
+  # Copy web files from html folder to html foler on control node.
   provisioner "file" {
-    source      = "html/tristan.html"
-    destination = "tristan.html"
+    source      = "html/"
+    destination = "html"
 
     connection {
       host        = azurerm_linux_virtual_machine.ansible_control_node.public_ip_address

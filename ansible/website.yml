@@ -6,5 +6,5 @@
   tasks: 
   - name: Copy website files to webserver
     copy:
-      src:  .
+      src:  ../html/
       dest: /var/www/html/
