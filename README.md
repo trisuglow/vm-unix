@@ -129,3 +129,13 @@ pipx upgrade --include-injected ansible
 
 Make sure the path is set.
 pipx ensurepath
+
+
+Read this
+
+https://docs.ansible.com/ansible-core/2.17/reference_appendices/interpreter_discovery.html
+
+
+
+This ran successfully (manually) from the control node.
+ ansible-playbook -v -u tuglow -i 172.167.103.97, --private-key ./.ssh/web_id_rsa /home/tuglow/ansible/smoketest.yml
