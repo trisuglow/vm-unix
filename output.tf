@@ -9,3 +9,7 @@ output "public_ip_address_ansible_control_node" {
 output "public_ip_address_web_server" {
   value = azurerm_linux_virtual_machine.web_server.public_ip_address
 }
+
+output "website_url" {
+  value = "http://${azurerm_linux_virtual_machine.web_server.public_ip_address}/tristan.html"
+}

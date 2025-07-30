@@ -166,7 +166,7 @@ resource "azurerm_linux_virtual_machine" "ansible_control_node" {
     inline = [
       "mkdir ansible",
       "mkdir html"
-      ]
+    ]
 
     connection {
       host        = azurerm_linux_virtual_machine.ansible_control_node.public_ip_address
@@ -262,13 +262,6 @@ resource "azurerm_linux_virtual_machine" "web_server" {
 
   boot_diagnostics {
     storage_account_uri = azurerm_storage_account.my_storage_account.primary_blob_endpoint
-  }
-
-  provisioner "local-exec" {
-    command     = <<-EOT
-"New-Item 'launch.ps1' -ItemType File -Force -Value 'Start-Process http://${azurerm_linux_virtual_machine.web_server.public_ip_address}/tristan.html'"
-     EOT
-    interpreter = ["PowerShell", "-Command"]
   }
 
   provisioner "remote-exec" {
