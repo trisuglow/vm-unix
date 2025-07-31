@@ -4,6 +4,8 @@ I am building a Unix VM in Azure.
 
 Here are the steps I followed to get to where I am.
 
+Go to https://my.visualstudio.com/Benefits?wt.mc_id=o~msft~profile~devprogram_attach&workflowid=devprogram&mkt=en-us and activate the "Azure $50 monthly credit".
+
   - Install the Azure CLI so I could use it in a Terminal Window (e.g. "az help").
   ```powershell
 Invoke-WebRequest -Uri https://aka.ms/installazurecliwindows -OutFile .\AzureCLI.msi; Start-Process msiexec.exe -Wait -ArgumentList '/I AzureCLI.msi /quiet'; rm .\AzureCLI.msi
@@ -67,9 +69,9 @@ This link gives an example script for a Unix VM. It didn't work straight out of 
 1. Because I'm using Standard, I also have to change from Dynamic to Static
 1. Standard_DS1_v2 is not available in uksouth. Tried swapping to Standard_B1_v2, which seems to be the smallest available that supports hypervisor v2.
 
-  - To get a list of vms supported in the location of your choice run this.
+  - To get a list of vms supported in the location of your choice run this. It takes a long time.
 ```powershell
-az vm list-skus --resourceType vms --location uksouth --zone --all --output table
+az vm list-skus --location uksouth --zone --all --output table
 ```   
 
 Having built the VM using Terraform it is possible to SSH into it from a GitBash window.
@@ -78,7 +80,7 @@ Navigate to this folder in GitBash and run the following command, using the IP a
 ssh -i ./.ssh/id_rsa tuglow@172.167.19.187
 ```
 
-After connecting to the machine using ssh, run this command to install apache. You'll then be able to use a browser to navigate to http://172.167.19.187/ and see the Apace2 default page.
+After connecting to the machine using ssh, run this command to install apache. You'll then be able to use a browser to navigate to http://172.167.19.187/ and see the Apache2 default page.
 ```
 sudo apt install apache2 -y
 ```
